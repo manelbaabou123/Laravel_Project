@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\task;
+use App\Models\Task;
 use Illuminate\Http\Request;
 use App\Models\Project;
+use App\Models\User;
+use Illuminate\Support\Facades\Log;
 
 class TaskController extends Controller
 {
@@ -13,7 +15,16 @@ class TaskController extends Controller
      */
     public function index()
     {
-        return view('task.index', ['tasks' => Task::paginate(4)]);
+        try {
+            //$this->authorize('view', Task::class);
+
+            $tasks =  Auth()->user()->hasRoleAdmin() ? Task::paginate(10) : Auth()->user()->tasks()->paginate(10);
+            return view('task.index', ['tasks' => $tasks]);
+            //return view('task.index',  ['tasks' => Task::paginate(10)]);
+         } catch (\Exception $ex) {
+             Log::critical("index error task".$ex->getMessage());
+             abort(500);
+         }
     }
 
     /**
@@ -21,7 +32,12 @@ class TaskController extends Controller
      */
     public function create()
     {
-        return view('task.create',['projects' => Project::all()]);
+        try {
+            return view('task.create', ['projects' => Project::all(), 'users' => User::all()]);
+        } catch (\Exception $ex) {
+            Log::critical("create error task".$ex->getMessage());
+            abort(500);
+        }
     }
 
     /**
@@ -29,17 +45,26 @@ class TaskController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate(['name' => 'required', 'description' => 'required', 'project_id' => 'required']);
-
+        try {
+            $request->validate([
+                'name' => 'required',
+                'description' => 'required',
+                'project_id' => 'required',
+                'user_id' => 'required'
+            ]);
         Task::create($request->all());
-
+        //$this->authorize('store', Task::class);
         return redirect()->route('task.index')->with('status', 'Task has been created successfully.');
+        } catch (\Exception $ex) {
+            Log::critical("store error task".$ex->getMessage());
+            abort(500);
+        }
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(task $task)
+    public function show(Task $task)
     {
         //
     }
@@ -49,27 +74,40 @@ class TaskController extends Controller
      */
     public function edit(Task $task)
     {
-        return view('task.update', ['task' =>  $task ,'projects' => Project::all()]);
-
+        try {
+            //$this->authorize('update', $task);
+            return view('task.update', ['task' =>  $task ,'projects' => Project::all(), 'users' => User::all()]);
+        } catch (\Exception $ex) {
+            Log::critical("edit error task".$ex->getMessage());
+            abort(500);
+        }
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, task $task)
+    public function update(Request $request, Task $task)
     {
-        $request->validate(['name' => 'required', 'description' => 'required', 'project_id' => 'required']);
+        try {
+            $request->validate([
+                'name' => 'required',
+                'description' => 'required',
+                'project_id' => 'required',
+                'user_id' => 'required'
+            ]);
       
-         $task->update([
-            'name' => $request->name,
-            'description' => $request->description,
-            'project_id' => $request->project_id
-        ]);
-        
-    
-
-       return redirect()->route('task.index')->with('status', 'Task has been successfully modified.');
-
+            $task->update([
+                'name' => $request->name,
+                'description' => $request->description,
+                'project_id' => $request->project_id,
+                'user_id' => $request->user_id
+            ]);
+            
+            return redirect()->route('task.index')->with('status', 'Task has been successfully modified.');
+        } catch (\Exception $ex) {
+            Log::critical("update error task".$ex->getMessage());
+            abort(500);
+        }
     }
 
     /**
@@ -77,7 +115,12 @@ class TaskController extends Controller
      */
     public function destroy(Task $task)
     {
-        $task->delete();
+        try {
+            $task->delete();
         return redirect()->route('task.index')->with('status', 'Task has been successfully suppressed.');
+        } catch (\Exception $ex) {
+            Log::critical("destroy error task".$ex->getMessage());
+            abort(500);
+        }
     }
 }

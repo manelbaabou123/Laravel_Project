@@ -1,66 +1,77 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>TO DO UP</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-aFq/bzH65dt+w6FI2ooMVUpc+21e0SRygnTpmBvdBgSdnuTN7QbdgL+OapgHtvPp" crossorigin="anonymous">
-  </head>
-  <body>
-
-
-    <body>
-        <div class="container text-center">
-            <div class="row">
-              <div class="col s12" >
-                <hr><hr>
-                <h2>Task</h2>
-                <hr>
-                <a href="{{ route('task.create') }}" class='btn btn-primary'>Create Task</a>
-                <hr>
+<x-app-layout>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <x-slot name="header">
+      <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
+          {{ __('List Tasks') }}
+      </h2>
+  </x-slot>
+  <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+    <a href="{{ route('dashboard') }}" type="submit" class="fa fa-home mt-4 dark:text-gray-400"></a>
+    </div>
+  <div class="py-12">
+ 
+    <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+        <div class="p-6 text-gray-900 dark:text-gray-100">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+          <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
+            <div class="p-6 text-gray-900 dark:text-gray-100">
+              <a href="{{ route('task.create') }}" type="submit" class="btn btn-info dark:text-gray-400 text-center" style="width: 1100px; margin: 0 auto;">Create Task</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  
     
-                @if (session('status'))
-                <div class="alert alert-success"> 
+    <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+      <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
+        <div class="p-6 text-gray-900 dark:text-gray-100">
+               @if (session('status'))
+                <div class="alert alert-success">
                     {{ session('status') }}
                 </div>
                 @endif
-    
+                <style>
+                  table {
+                    display: table;
+                    border-collapse: separate;
+                    border-spacing: 10px;
+                    border-color: gray;
+                  }
+                  </style>
                 <table class="table">
                     <thead>
                         <tr>
-                            <th>#</th>
-                            <th>Name</th>
+                          <th>#</th>
+                            <th>Task</th>
                             <th>Description</th>
                             <th>Project</th>
                             <th>Action</th>
                         </tr>
                     </thead>
+                    
                     <tbody>
-                      @php
-                        $ide = 1;
-                      @endphp
+                   
+                      <hr>
                       @foreach ($tasks as $task )
                         <tr>
-                            <td>{{ $ide }}</td>
+                          <td>{{ ++$loop->index }}</td>
                             <td>{{ $task->name }}</td>
                             <td>{{ $task->description }}</td>
                             <td>{{ $task->project->name }}</td>
-                            <td>                    
-                                <a href="{{ route('task.edit', $task) }}" class="btn btn-info">Update</a>
-                                <a href="{{ route('task.destroy', $task) }}" class="btn btn-danger">Delete</a>
+                            <td>
+                                <a href="{{ route('task.edit', $task) }}" class="fa fa-edit"></a>
+                                <a href="{{ route('task.destroy', $task) }}" class="fa fa-trash"></a>
                             </td>
                         </tr>
-                        @php
-                          $ide += 1;
-                        @endphp
+                       
                         @endforeach
                     </tbody>
+                   
                 </table>
+                <hr>
                 {{ $tasks->links() }}
               </div>
             </div>
           </div>
-    
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha2/dist/js/bootstrap.bundle.min.js" integrity="sha384-qKXV1j0HvMUeCBQ+QVp7JcfGl760yU08IQ+GpUo5hlbpg51QRiuqHAJz8+BrxE/N" crossorigin="anonymous"></script>
-    </body>
-</html>
+</x-app-layout>

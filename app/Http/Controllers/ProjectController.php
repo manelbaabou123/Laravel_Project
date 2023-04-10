@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\project;
+use App\Models\Project;
+use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class ProjectController extends Controller
 {
@@ -12,7 +14,12 @@ class ProjectController extends Controller
      */
     public function index()
     {
-        return view('project.index', ['projects' => Project::paginate(4)]);
+        try {
+            return view('project.index', ['projects' => Project::paginate(10)]);
+        } catch (Exception $ex) {
+            Log::critical("index error project".$ex->getMessage());
+            abort(500);
+        }
     }
 
     /**
@@ -20,19 +27,28 @@ class ProjectController extends Controller
      */
     public function create()
     {
-        return view('project.create');
+        try {
+            return view('project.create');
+        } catch (Exception $ex) {
+            Log::critical("create error project".$ex->getMessage());
+            abort(500);
+        }
+        
     }
 
     /**
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
-    {
-        $request->validate(['name' => 'required', 'description' => 'required']);
-
-        Project::create($request->all());
-
-        return redirect()->route('project.index')->with('status', 'Project has been created successfully.');
+    {   try {
+            $request->validate(['name' => 'required', 'description' => 'required']);
+            Project::create($request->all());
+            return redirect()->route('project.index')->with('status', 'Project has been created successfully.');
+        } catch (Exception $ex) {
+            Log::critical("store error project".$ex->getMessage());
+            abort(500);
+        }
+        
     }
 
     /**
@@ -47,27 +63,35 @@ class ProjectController extends Controller
      * Show the form for editing the specified resource.
      */
     public function edit(Project $project)
-    {
-        return view('project.update', ['project' =>  $project]);
+    {   try {
+            return view('project.update', ['project' =>  $project]);
+        } catch (Exception $ex) {
+            Log::critical("edit error project".$ex->getMessage());
+            abort(500);
+        }
+        
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, project $project)
+    public function update(Request $request, Project $project)
     {
-
-      //  dd($request->all());
-        $request->validate(['name' => 'required', 'description' => 'required']);
-      
-         $project->update([
+        try {
+            //  dd($request->all());
+            $request->validate(['name' => 'required', 'description' => 'required']);
+        
+            $project->update([
             'name' => $request->name,
             'description' => $request->description
-        ]);
-        
-    
-
-       return redirect()->route('project.index')->with('status', 'Project has been successfully modified.');
+            ]);
+            
+            return redirect()->route('project.index')->with('status', 'Project has been successfully modified.');
+        } catch (Exception $ex) {
+            Log::critical("update error project".$ex->getMessage());
+            abort(500);
+        }
+      
 
     }
 
@@ -76,7 +100,13 @@ class ProjectController extends Controller
      */
     public function destroy(Project $project)
     {
-        $project->delete();
-        return redirect()->route('project.index')->with('status', 'Project has been successfully suppressed.');
+        try {
+            $project->delete();
+            return redirect()->route('project.index')->with('status', 'Project has been successfully suppressed.');
+        } catch (Exception $ex) {
+            Log::critical("destroy error project".$ex->getMessage());
+            abort(500);
+        }
+        
     }
 }
