@@ -10,7 +10,7 @@
     <a href="{{ route('dashboard') }}" type="submit" class="fa fa-home mt-4 dark:text-gray-400"></a>
     </div>
   <div class="py-12">
- 
+  @can('create', \App\Models\Project::class)
     <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
         <div class="p-6 text-gray-900 dark:text-gray-100">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
@@ -22,6 +22,7 @@
         </div>
       </div>
     </div>
+  @endcan
   
     
     <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
@@ -47,7 +48,6 @@
                           <th>#</th>
                           <th>Project</th>
                           <th>Description</th>
-                          <th>Action</th>
                       </tr>
                   </thead>
                   <tbody>
@@ -58,8 +58,12 @@
                           <td>{{ $project->name }}</td>
                           <td>{{ $project->description }}</td>
                           <td>
+                            @can('update', $project)
                             <a href="{{ route('project.edit', $project) }}" class="fa fa-edit "></a>
+                            @endcan
+                            @can('delete', $project)
                             <a href="{{ route('project.destroy', $project) }}" class="fa fa-trash mt-4 "></a>
+                            @endcan
                           </td>
                       </tr>
                       

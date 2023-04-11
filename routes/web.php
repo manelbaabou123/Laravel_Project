@@ -30,16 +30,14 @@ Route::middleware('auth')->group(function () {
         Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
         Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    Route::prefix('users')->group(function () {
-        Route::get('/index', [UserController::class, 'index'])->name('user.index');
-        Route::get('/create', [ProjectController::class, 'create'])->name('user.create');
-        Route::post('/store', [UserController::class, 'store'])->name('user.store');
-        Route::get('/edit/{user}', [UserController::class, 'edit'])->name('user.edit');
-        Route::post('/update/{user}', [UserController::class, 'update'])->name('user.update');
-        Route::get('/destroy/{user}', [UserController::class, 'destroy'])->name('user.destroy');
-    });
-    
-
+Route::prefix('users')->group(function () {
+    Route::get('/index', [UserController::class, 'index'])->name('user.index');
+    Route::get('/create', [UserController::class, 'create'])->name('user.create');
+    Route::post('/store', [UserController::class, 'store'])->name('user.store');
+    Route::get('/edit/{user}', [UserController::class, 'edit'])->name('user.edit');
+    Route::post('/update/{user}', [UserController::class, 'update'])->name('user.update');
+    Route::get('/destroy/{user}', [UserController::class, 'destroy'])->name('user.destroy');
+});
 
 Route::prefix('projects')->group(function () {
     Route::get('/index', [ProjectController::class, 'index'])->name('project.index');

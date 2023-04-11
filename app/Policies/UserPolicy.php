@@ -11,10 +11,9 @@ class UserPolicy
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user, User $model): bool
+    public function view(User $user): bool
     {
         return $user->hasRoleAdmin();
-
     }
 
     /**
@@ -22,7 +21,7 @@ class UserPolicy
      */
     public function create(User $user): bool
     {
-        //return $user->hasRoleAdmin();
+        return $user->hasRoleAdmin();
     }
 
     /**
@@ -39,6 +38,8 @@ class UserPolicy
     public function delete(User $user, User $model): bool
     {
         //return $user->hasRole('admin');
+        return $user->hasRoleAdmin();
+
     }
 
     /**

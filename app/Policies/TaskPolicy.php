@@ -29,7 +29,7 @@ class TaskPolicy
      */
     public function create(User $user): bool
     {
-        return $user->hasRoleAdmin() || $user->id == $task->user_id;
+        return $user->hasRoleAdmin() || (auth()->check() && $user->id == $task->user_id);
     }
 
     /**
@@ -37,7 +37,7 @@ class TaskPolicy
      */
     public function update(User $user, Task $task): bool
     {
-        return $user->hasRoleAdmin() || $user->id == $task->user_id;
+        return $user->hasRoleAdmin() || (auth()->check() && $user->id == $task->user_id);
     }
 
     /**
@@ -45,7 +45,7 @@ class TaskPolicy
      */
     public function delete(User $user, Task $task): bool
     {
-        return $user->hasRoleAdmin() || $user->id == $task->user_id;
+        return $user->hasRoleAdmin() || (auth()->check() && $user->id == $task->user_id);
     }
 
     /**

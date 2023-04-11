@@ -15,6 +15,20 @@
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         {{ __('Dashboard') }}
                     </x-nav-link>
+
+                    @can('view', App\Models\User::class)
+                    <x-nav-link :href="route('user.index')" :active="request()->routeIs('user.index')">
+                        {{ __('Members') }}
+                    </x-nav-link>
+                    @endcan
+                   
+                    <x-nav-link :href="route('project.index')" :active="request()->routeIs('project.index')">
+                        {{ __('Projects') }}
+                    </x-nav-link>
+                   
+                    <x-nav-link :href="route('task.index')" :active="request()->routeIs('task.index')">
+                        {{ __('Tasks') }}
+                    </x-nav-link>
                 </div>
             </div>
 
