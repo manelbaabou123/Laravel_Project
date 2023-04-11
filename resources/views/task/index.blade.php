@@ -42,10 +42,11 @@
                 <table class="table">
                     <thead>
                         <tr>
-                          <th>#</th>
+                            <th>#</th>
+                            <th>Project</th>
+                            <th>User</th>
                             <th>Task</th>
                             <th>Description</th>
-                            <th>Project</th>
                             <th>Action</th>
                         </tr>
                     </thead>
@@ -55,10 +56,11 @@
                       <hr>
                       @foreach ($tasks as $task )
                         <tr>
-                          <td>{{ ++$loop->index }}</td>
+                           <td>{{ ++$loop->index }}</td>
+                            <td>{{ $task->project->name }}</td>
+                            <td>{{ $task->user->name }}</td>
                             <td>{{ $task->name }}</td>
                             <td>{{ $task->description }}</td>
-                            <td>{{ $task->project->name }}</td>
                             <td>
                                 <a href="{{ route('task.edit', $task) }}" class="fa fa-edit"></a>
                                 <a href="{{ route('task.destroy', $task) }}" class="fa fa-trash"></a>

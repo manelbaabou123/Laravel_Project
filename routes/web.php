@@ -29,7 +29,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
         Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
         Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-
+    });
 Route::prefix('users')->group(function () {
     Route::get('/index', [UserController::class, 'index'])->name('user.index');
     Route::get('/create', [UserController::class, 'create'])->name('user.create');
@@ -57,7 +57,7 @@ Route::prefix('tasks')->group(function () {
     Route::get('/destroy/{task}', [TaskController::class, 'destroy'])->name('task.destroy');
 });
 
-});
+
 
 
 require __DIR__.'/auth.php';

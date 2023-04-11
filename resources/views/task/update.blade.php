@@ -22,6 +22,17 @@
             <hr>
   <form action="{{ route('task.update', $task) }}" method="POST" class="mt-6 space-y-6">
       @csrf
+
+      <div class="form-group  dark:text-gray-400">
+        <input type="text" name="id" style="display: none;" value="{{ $task->id }}">
+          <div class="form-group">
+              <label for="User" class="form-label ">Select User</label>
+            <select name="user_id" class="form-control">
+              @foreach ($users as $user)
+                <option value="{{ $user->id }}" {{ $task->user_id == $user->id ? 'selected' : '' }}>{{ $user->name }}</option>
+              @endforeach
+            </select>
+          </div>
     
       <div class="form-group  dark:text-gray-400">
         <input type="text" name="id" style="display: none;" value="{{ $task->id }}">
