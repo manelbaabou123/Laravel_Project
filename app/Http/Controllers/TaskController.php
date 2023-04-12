@@ -6,6 +6,7 @@ use App\Models\Task;
 use Illuminate\Http\Request;
 use App\Models\Project;
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 class TaskController extends Controller
@@ -50,9 +51,16 @@ class TaskController extends Controller
                 'name' => 'required',
                 'description' => 'required',
                 'project_id' => 'required',
-                'user_id' => 'required'
+                'user_id' =>  Auth()->user()->hasRoleAdmin() ?  'required' : ''
             ]);
-        Task::create($request->all());
+
+               Task::create( [
+                "project_id" =>  $request->project_id,
+                "name" =>  $request->name,
+                "description" => $request->description,
+                'user_id' => Auth()->user()->hasRoleAdmin() ?  $request->user_id  : Auth::id()
+        ]);
+       
         //$this->authorize('store', Task::class);
         return redirect()->route('task.index')->with('status', 'Task has been created successfully.');
         } catch (\Exception $ex) {
@@ -93,14 +101,17 @@ class TaskController extends Controller
                 'name' => 'required',
                 'description' => 'required',
                 'project_id' => 'required',
-                'user_id' => 'required'
+                //'user_id' => 'required',
+                'user_id' =>  Auth()->user()->hasRoleAdmin() ?  'required' : ''
+
             ]);
       
             $task->update([
                 'name' => $request->name,
                 'description' => $request->description,
                 'project_id' => $request->project_id,
-                'user_id' => $request->user_id
+                // 'user_id' => $request->user_id,
+                'user_id' => Auth()->user()->hasRoleAdmin() ?  $request->user_id  : Auth::id()
             ]);
             
             return redirect()->route('task.index')->with('status', 'Task has been successfully modified.');

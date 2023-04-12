@@ -21,10 +21,12 @@
                         {{ __('Members') }}
                     </x-nav-link>
                     @endcan
-                   
+
+                    @can('view', App\Models\Project::class)
                     <x-nav-link :href="route('project.index')" :active="request()->routeIs('project.index')">
                         {{ __('Projects') }}
                     </x-nav-link>
+                    @endcan
                    
                     <x-nav-link :href="route('task.index')" :active="request()->routeIs('task.index')">
                         {{ __('Tasks') }}

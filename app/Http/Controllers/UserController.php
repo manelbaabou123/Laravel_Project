@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
 use App\Models\Project;
+use App\Models\Role;
 use App\Models\Task;
 use App\Models\User;
 use Illuminate\Contracts\View\View;
@@ -21,7 +22,10 @@ class UserController extends Controller
     public function index()
     {
         try {
+            if(Auth()->user()->hasRoleAdmin())
             return view('user.index', ['users' => User::paginate(10)]);
+            return redirect()->back()->with('status', '************** YOU DO NOT HAVE ACCESS ! ******************');
+
         } catch (\Exception $ex) {
             Log::critical("index error user".$ex->getMessage());
             abort(500);
@@ -35,7 +39,7 @@ class UserController extends Controller
     {
         try {
             if (Auth()->user()->hasRoleAdmin()){
-                return view('user.create');
+                return view('user.create', ['roles' => Role::select('id','name')->get()]);
             }
             return redirect()->back()->with('status', '************** YOU DO NOT HAVE ACCESS ! ******************');
 
@@ -50,8 +54,14 @@ class UserController extends Controller
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
-    {   try {
-            $request->validate(['name' => 'required', 'email' => 'required', 'password' => 'required']);
+    {
+         try {
+            $request->validate([
+                'name' => 'required',
+                'email' => 'required',
+                'password' => 'required',
+                'role_id' => 'required'
+            ]);
             User::create($request->all());
             return redirect()->route('user.index')->with('status', 'User has been created successfully.');
         } catch (\Exception $ex) {
@@ -76,7 +86,7 @@ class UserController extends Controller
     {
         try {
             if(Auth()->user()->hasRoleAdmin()){
-                return view('user.update', ['user' => $user]);
+                return view('user.update', ['roles' => Role::select('id','name')->get()]);
             }
         return  redirect()->route("user.index")->with('status', '************ YOU DO NOT HAVE ACCESS TO UPDATE USERS ! *************');
         } catch (\Exception $ex) {
@@ -93,17 +103,18 @@ class UserController extends Controller
         try {
             $request->user()->fill($request->validated());
 
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
-        }
+            if ($request->user()->isDirty('email')) {
+                $request->user()->email_verified_at = null;
+            }
 
-        $request->user()->save();
+            $request->user()->save();
 
-        return Redirect::route('user.index')->with('status', 'User has been updated successfully.');
-        } catch (\Exception $ex) {
-            Log::critical("update error user".$ex->getMessage());
-            abort(500);
-        }
+            return Redirect::route('user.index')->with('status', 'User has been updated successfully.');
+    
+            } catch (\Exception $ex) {
+                Log::critical("update error user".$ex->getMessage());
+                abort(500);
+            }
     }
 
     /**

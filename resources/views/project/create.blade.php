@@ -3,7 +3,7 @@
   <hr><hr><hr>
 
             @if (session('status'))
-                <div class="alert alert-success"> 
+                <div class="alert alert-success">
                     {{ session('status') }}
                 </div>
             @endif
@@ -12,7 +12,7 @@
             @foreach ($errors->all() as $error)
                 <li class="alert alert-danger">{{ $error }}</li>
             @endforeach
-            </ul>    
+            </ul>
             <hr>
   <form action="{{ route('project.store') }}" method="POST" class="form-group">
       @csrf

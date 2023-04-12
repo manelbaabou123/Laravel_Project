@@ -2,6 +2,19 @@
     <form method="POST" action="{{ route('user.store') }}">
         @csrf
 
+        <!-- Role -->
+        <div class="flex items-center justify mt-4">
+            <div class="form-group  dark:text-gray-400">
+              <label for="Role" class="form-label block mt-1 w-full">Role</label>
+              <select name="rolet_id" class="form-control">
+                <option disabled selected>Select object</option>
+                @foreach ($roles as $role)
+                  <option value="{{ $role->id }}">{{ $role->name }}</option>
+                @endforeach
+              </select>
+            </div>
+          </div>
+
         <!-- Name -->
         <div>
             <x-input-label for="name" :value="__('Name')" />

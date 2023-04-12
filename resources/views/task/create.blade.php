@@ -17,6 +17,8 @@
   <form action="{{ route('task.store') }}" method="POST" class="form-group">
       @csrf
 
+      @can('view', \App\Models\User::class)
+      <!-- User -->
       <div class="flex items-center justify mt-4">
         <div class="form-group  dark:text-gray-400">
           <label for="User" class="form-label block mt-1 w-full">User</label>
@@ -28,7 +30,8 @@
           </select>
         </div>
       </div>
-
+      @endcan
+    <!-- Project -->
     <div class="flex items-center justify mt-4">
       <div class="form-group  dark:text-gray-400">
         <label for="Project" class="form-label block mt-1 w-full">Project</label>
@@ -62,7 +65,7 @@
         <a href="{{ route('task.index') }}" type="submit" class="btn btn-info dark:text-gray-400 text-center">Back</a>
           <x-primary-button class="ml-4">
             Create
-          </x-primary-button>   
+          </x-primary-button>
       </div>
   </form>
 </x-guest-layout>

@@ -44,6 +44,7 @@
                   <thead>
                       <tr>
                         <th>#</th>
+                          <th>Role</th>
                           <th>Name</th><th></th>
                           <th>Email</th><th></th>
                           <!--<th>Task</th><th></th>-->
@@ -55,6 +56,7 @@
                     @foreach ($users as $user )
                       <tr>
                         <td>{{ ++$loop->index }}</td>
+                          <td>{{ $user->role?->name }}</td>
                           <td>{{ $user->name }}</td><td></td>
                           <td>{{ $user->email }}</td><td></td>
                           <td>{{ $user->task?->name }}</td><td></td>
