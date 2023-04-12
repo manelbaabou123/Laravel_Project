@@ -6,6 +6,7 @@ namespace Database\Seeders;
 
 use App\Models\Role;
 use App\Models\User;
+use App\Models\Project;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
 
@@ -20,7 +21,7 @@ class DatabaseSeeder extends Seeder
          \App\Models\Project::factory(10)->create();
          \App\Models\Task::factory(10)->create();
 
-         
+
          Role::create(['name' => 'admin']);
          Role::create(['name' => 'user']);
         foreach (User::all() as $user) {
