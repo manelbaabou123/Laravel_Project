@@ -5,9 +5,6 @@
           {{ __('List Members') }}
       </h2>
   </x-slot>
-  <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-  <a href="{{ route('dashboard') }}" type="submit" class="fa fa-home mt-4 dark:text-gray-400"></a>
-  </div>
   
   @can('create', \App\Models\User::class)
     <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
@@ -15,7 +12,7 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
           <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
             <div class="p-6 text-gray-900 dark:text-gray-100">
-              <a href="{{ route('user.create') }}" type="submit" class="btn btn-info dark:text-gray-400 text-center" style="width: 1100px; margin: 0 auto;">Add new User</a>
+              <a href="{{ route('user.create') }}" type="submit" class="btn btn-info dark:text-gray-400 text-center" style="width: 1100px; margin: 0 auto;">Add New User</a>
               
             </div>
           </div>
@@ -23,30 +20,39 @@
       </div>
     </div>
   @endcan
+
+  <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+    <div class="p-6 text-gray-900 dark:text-gray-100">
+      @if (session('status'))
+      <div class="alert alert-success">
+          {{ session('status') }}
+      </div>
+      @endif
+    </div>
+  </div>
+
     
     <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
       <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg ">
         <div class="p-6 text-gray-900 dark:text-gray-100">
-               @if (session('status'))
-                <div class="alert alert-success">
-                    {{ session('status') }}
-                </div>
-                @endif
+              
                 <style>
                   table {
-                    display: table;
+                    display: table ;
                     border-collapse: separate;
-                    border-spacing: 10px;
+                    border-spacing: 27px;
                     border-color: gray;
                   }
                   </style>
+                  <hr>
                 <table class="table">
                   <thead>
                       <tr>
                         <th>#</th>
                           <th>Role</th>
                           <th>Name</th><th></th>
-                          <th>Email</th><th></th>
+                          <th>Email</th><th></th><th></th><th></th>
+                          <th>Action</th>
                           <!--<th>Task</th><th></th>-->
                           
                       </tr>
@@ -56,7 +62,11 @@
                     @foreach ($users as $user )
                       <tr>
                         <td>{{ ++$loop->index }}</td>
-                          <td>{{ $user->role?->name }}</td>
+                          <td>
+                          @foreach ($user->roles as  $role)
+                          <li>{{ $role->name }}</li>
+                          @endforeach
+                        </td>
                           <td>{{ $user->name }}</td><td></td>
                           <td>{{ $user->email }}</td><td></td>
                           <td>{{ $user->task?->name }}</td><td></td>
@@ -72,6 +82,7 @@
                       @endforeach
                   </tbody>
               </table>
+              <hr>
               {{ $users->links() }}
               </div>
             </div>

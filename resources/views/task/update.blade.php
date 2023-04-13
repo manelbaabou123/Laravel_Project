@@ -23,6 +23,7 @@
   <form action="{{ route('task.update', $task) }}" method="POST" class="mt-6 space-y-6">
       @csrf
 
+      <!-- User -->
       @can('view', \App\Models\User::class)
       <div class="form-group  dark:text-gray-400">
         <input type="text" name="id" style="display: none;" value="{{ $task->id }}">
@@ -36,6 +37,7 @@
           </div>
           @endcan
     
+          <!-- Project -->
       <div class="form-group  dark:text-gray-400">
         <input type="text" name="id" style="display: none;" value="{{ $task->id }}">
           <div class="form-group">

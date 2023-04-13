@@ -23,7 +23,7 @@ class UserController extends Controller
     {
         try {
             if(Auth()->user()->hasRoleAdmin())
-            return view('user.index', ['users' => User::paginate(10)]);
+            return view('user.index', ['users' => User::with("roles")->paginate(10)]);
             return redirect()->back()->with('status', '************** YOU DO NOT HAVE ACCESS ! ******************');
 
         } catch (\Exception $ex) {
@@ -37,16 +37,16 @@ class UserController extends Controller
      */
     public function create()
     {
-        try {
+        // try {
             if (Auth()->user()->hasRoleAdmin()){
                 return view('user.create', ['roles' => Role::select('id','name')->get()]);
             }
             return redirect()->back()->with('status', '************** YOU DO NOT HAVE ACCESS ! ******************');
 
-        } catch (\Exception $ex) {
-            Log::critical("create error user".$ex->getMessage());
-            abort(500);
-        }
+        // } catch (\Exception $ex) {
+        //     Log::critical("create error user".$ex->getMessage());
+        //     abort(500);
+        // }
         
     }
 
@@ -57,12 +57,15 @@ class UserController extends Controller
     {
          try {
             $request->validate([
+                'role_id' => 'required',
                 'name' => 'required',
-                'email' => 'required',
+                'email' => 'required|unique:users',
                 'password' => 'required',
-                'role_id' => 'required'
             ]);
-            User::create($request->all());
+          
+         $user =   User::create($request->all());
+         $user->roles()->attach($request->role_id);
+
             return redirect()->route('user.index')->with('status', 'User has been created successfully.');
         } catch (\Exception $ex) {
             Log::critical("store error User".$ex->getMessage());
@@ -86,7 +89,7 @@ class UserController extends Controller
     {
         try {
             if(Auth()->user()->hasRoleAdmin()){
-                return view('user.update', ['roles' => Role::select('id','name')->get()]);
+                return view('user.update', ['roles' => Role::select('id','name')->get(),'user'=> $user]);
             }
         return  redirect()->route("user.index")->with('status', '************ YOU DO NOT HAVE ACCESS TO UPDATE USERS ! *************');
         } catch (\Exception $ex) {
@@ -98,49 +101,47 @@ class UserController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(ProfileUpdateRequest $request): RedirectResponse
+    public function update(Request $request, User $user)
     {
-        try {
-            $request->user()->fill($request->validated());
+       // dd($request->all());
+        // try {
+            $request->validate([
+                'role_id' => 'required',
+                'name' => 'required',
+                'email' => 'required|unique:users,email,'.$user->id,
+                'password' => 'required',
+            ]);
+      
+            $user->update([
+                'role_id' => $request->role_id,
+                'name' => $request->name,
+                'email' => $request->email,
+                'password' => $request->password,
+            ]);
+            
+            $user->roles()->sync($request->role_id);
 
-            if ($request->user()->isDirty('email')) {
-                $request->user()->email_verified_at = null;
-            }
+            return redirect()->route('user.index')->with('status', 'User has been successfully modified.');
 
-            $request->user()->save();
-
-            return Redirect::route('user.index')->with('status', 'User has been updated successfully.');
-    
-            } catch (\Exception $ex) {
-                Log::critical("update error user".$ex->getMessage());
-                abort(500);
-            }
+            // } catch (\Exception $ex) {
+            //     Log::critical("update error user".$ex->getMessage());
+            //     abort(500);
+            // }
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Request $request): RedirectResponse
+    public function destroy(User $user)
     {
         try {
-            if ( Auth()->user()->hasRoleAdmin()){
-                $request->validateWithBag('userDeletion', [
-                    'password' => ['required', 'current_password'],
-                ]);
-        
-                $user = $request->user();
-        
-                Auth::logout();
-        
-                $user->delete();
-        
-                $request->session()->invalidate();
-                $request->session()->regenerateToken();
-        
-                return Redirect::to('user.index', Auth()->user()->hasRoleAdmin())->with('status', 'user-updated !');
+            if (Auth()->user()->hasRoleAdmin())
+            {
+            $user->delete();
+            return redirect()->route('user.index')->with('status', 'user has been successfully suppressed.');
             }
-            return redirect()->back()->with('status', '*************** YOU DO NOT HAVE ACCESS TO DELETE USER ! *********************');
-           
+            return  redirect()->route("task.index")->with('status', '************ YOU DO NOT HAVE ACCESS TO DELETE user ! *************');
+
         } catch (\Exception $ex) {
             Log::critical("destroy error user".$ex->getMessage());
             abort(500);
