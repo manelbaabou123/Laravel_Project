@@ -28,7 +28,11 @@ class ProjectController extends Controller
     public function create()
     {
         try {
-            return view('project.create');
+            if(auth()->user()->roles()->where('name', 'admin')->exists()) {
+                return view('project.create');
+            } else {
+                return redirect()->route('project.index')->withErrors(['message' => 'You are not authorized to access this page.']);
+            }
         } catch (Exception $ex) {
             Log::critical("create error project".$ex->getMessage());
             abort(500);
