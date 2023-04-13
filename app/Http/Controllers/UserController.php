@@ -118,10 +118,10 @@ class UserController extends Controller
             ]);
       
             $user->update([
-                'role_id' => $request->role_id,
+                'role_id' => 'required',
                 'name' => $request->name,
                 'email' => $request->email,
-                'password' => $request->password,
+                'password' => Hash::make($request->password),
             ]);
             
             $user->roles()->sync($request->role_id);
@@ -142,8 +142,10 @@ class UserController extends Controller
       
             if (Auth()->user()->hasRoleAdmin())
             {
+                if ($user == Auth()->user()){
+                    return redirect()->route('user.index')->with('status', '***** You can not Destroy yourself ! *******');
+                }
             $user->roles()->detach($user->roles);
-            Auth::logout();
             $user->delete();
             return redirect()->route('user.index')->with('status', 'user has been successfully suppressed.');
             }
