@@ -11,6 +11,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redirect;
 
@@ -37,16 +38,16 @@ class UserController extends Controller
      */
     public function create()
     {
-        // try {
+         try {
             if (Auth()->user()->hasRoleAdmin()){
                 return view('user.create', ['roles' => Role::select('id','name')->get()]);
             }
             return redirect()->back()->with('status', '************** YOU DO NOT HAVE ACCESS ! ******************');
 
-        // } catch (\Exception $ex) {
-        //     Log::critical("create error user".$ex->getMessage());
-        //     abort(500);
-        // }
+        } catch (\Exception $ex) {
+            Log::critical("create error user".$ex->getMessage());
+            abort(500);
+        }
         
     }
 
@@ -63,7 +64,11 @@ class UserController extends Controller
                 'password' => 'required',
             ]);
           
-         $user =   User::create($request->all());
+         $user =   User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+         ]);
          $user->roles()->attach($request->role_id);
 
             return redirect()->route('user.index')->with('status', 'User has been created successfully.');
@@ -104,7 +109,7 @@ class UserController extends Controller
     public function update(Request $request, User $user)
     {
        // dd($request->all());
-        // try {
+         try {
             $request->validate([
                 'role_id' => 'required',
                 'name' => 'required',
@@ -123,10 +128,10 @@ class UserController extends Controller
 
             return redirect()->route('user.index')->with('status', 'User has been successfully modified.');
 
-            // } catch (\Exception $ex) {
-            //     Log::critical("update error user".$ex->getMessage());
-            //     abort(500);
-            // }
+            } catch (\Exception $ex) {
+                Log::critical("update error user".$ex->getMessage());
+                abort(500);
+            }
     }
 
     /**
@@ -134,17 +139,16 @@ class UserController extends Controller
      */
     public function destroy(User $user)
     {
-        try {
+      
             if (Auth()->user()->hasRoleAdmin())
             {
+            $user->roles()->detach($user->roles);
+            Auth::logout();
             $user->delete();
             return redirect()->route('user.index')->with('status', 'user has been successfully suppressed.');
             }
             return  redirect()->route("task.index")->with('status', '************ YOU DO NOT HAVE ACCESS TO DELETE user ! *************');
 
-        } catch (\Exception $ex) {
-            Log::critical("destroy error user".$ex->getMessage());
-            abort(500);
-        }    
+  
     }
 }
