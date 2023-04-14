@@ -6,6 +6,6 @@ trait Access
 
     function hasRoleAdmin()
     {
-        return in_array(1, auth()->user()->roles()->get()->pluck('id')->toArray());
+        return in_array(1, auth()->user()->role()->get()->pluck('id')->toArray());
     }
 }

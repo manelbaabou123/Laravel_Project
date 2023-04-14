@@ -5,7 +5,8 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -22,6 +23,7 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
+        'role_id',
         'password',
     ];
 
@@ -50,13 +52,13 @@ class User extends Authenticatable
         return $this->belongsToMany(Task::class);
     }
 
-    public function roles(): BelongsToMany
+    public function role(): BelongsTo
     {
-        return $this->belongsToMany(Role::class);
+        return $this->belongsTo(Role::class);
     }
-    public function projects() : BelongsToMany
+    public function projects() : HasMany
     {
-        return $this->belongsToMany(Project::class);
+        return $this->hasMany(Project::class);
     }
 
 

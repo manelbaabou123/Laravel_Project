@@ -9,7 +9,7 @@
     <a href="{{ route('dashboard') }}" type="submit" class="fa fa-home mt-4 dark:text-gray-400"></a>
     </div>
   <div class="py-12">
- 
+
     <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
         <div class="p-6 text-gray-900 dark:text-gray-100">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
@@ -21,8 +21,8 @@
         </div>
       </div>
     </div>
-  
-    
+
+
     <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
       <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
         <div class="p-6 text-gray-900 dark:text-gray-100">
@@ -50,15 +50,27 @@
                             <th>Action</th>
                         </tr>
                     </thead>
-                    
+
                     <tbody>
-                   
+
                       <hr>
                       @foreach ($tasks as $task )
                         <tr>
                            <td>{{ ++$loop->index }}</td>
                             <td>{{ $task->project->name }}</td>
-                            <td>{{ $task->user->name }}</td>
+                            <td>
+                                <ul>
+
+
+                                @foreach ($task->users as $user)
+
+                                    <li>{{ $user->name }}</li>
+
+                                @endforeach
+
+                            </ul>
+
+                                </td>
                             <td>{{ $task->name }}</td>
                             <td>{{ $task->description }}</td>
                             <td>
@@ -66,10 +78,11 @@
                                 <a href="{{ route('task.destroy', $task) }}" class="fa fa-trash"></a>
                             </td>
                         </tr>
-                       
+
                         @endforeach
+
                     </tbody>
-                   
+
                 </table>
                 <hr>
                 {{ $tasks->links() }}

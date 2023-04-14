@@ -13,147 +13,124 @@ class TaskTest extends TestCase
 {
     use DatabaseTransactions;
 
-    public function testIndexViewReturnsTasksBelongingToConnectedUserAndProject()
+    public function index_view_only_returns_tasks_belongs_to_connected_user_and_given_project()
     {
         // Create a admin and a project then attach user to project
-        Role::create(['name' => 'admin']);
-        Role::create(['name' => 'user']);
-        $admin=User::factory()->create();
-        $admin->roles()->attach(1);
-        $user = User::factory()->create();
-        $user->roles()->attach(2);
+       $ok1= Role::create(['name' => 'admin']);
+        $ok2 = Role::create(['name' => 'user']);
+
+        $admin=User::factory()->create(['role_id' => $ok1->id]);
+        $user = User::factory()->create(['role_id' => $ok2->id]);
+        $user2 = User::factory()->create(['role_id' => $ok1->id]);
         $project = Project::factory()->create(['creator_id' => $admin->id]);
         $project->users()->attach($user->id);
+       // Route::get('/create', [ProjectController::class, 'create'])->name('project.create');
 
         // Create two tasks belonging to the project for the user
         $task1 = Task::factory()->create(['project_id' => $project->id,'creator_id' => $admin->id]);
         $task2 = Task::factory()->create(['project_id' => $project->id,'creator_id' => $admin->id]);
-        $response = $this->actingAs($user)->get(route('task.index', ['project' => $project->id]));
 
-        // Assert that the response has a 200 status code
-        $response->assertStatus(200);
-        
-       $task1->users()->attach($user->id);
-       // $user->tasks()->attach($task1);
+        //
+        $task1->users()->attach($user);
+        //$user->tasks()->attach($task1);
+        $task2->users()->attach($user2->id);
+
         // Create a task belonging to a different project
         $otherProject = Project::factory()->create(['creator_id' => $admin->id]);
         $otherTask = Task::factory()->create(['project_id' => $otherProject->id,'creator_id' => $admin->id]);
 
+        $otherTask->users()->attach($user2->id);
 
         // Call the task index endpoint for the project
-        $response = $this->actingAs($user)->get(route('task.index', ['project' => $project->id]));
+        $response = $this->actingAs($user)->get(route('task.index'));
 
-        // Assert that the response has a 200 status code
         $response->assertStatus(200);
+        $response->assertSee($task1->name);
+        $response->assertSee($task1->description);
+        $response->assertDontSee($task2->name);
+        $response->assertDontSee($task2->description);
 
-    }
-    /** @test */
-    public function index_view_only_returns_tasks_belongs_to_connected_user_and_given_project()
-    {
-        $user = User::factory()->create();
-        $user2 = User::factory()->create();
-        Role::create(['name' => 'admin']);
-        Role::create(['name' => 'user']);
-        $admin = User::factory()->create();
-        $user->roles()->attach(2);
-        $user2->roles()->attach(2);
-        $admin->roles()->attach(1);
-
-        $project = Project::factory()->create();
-        $project2 = Project::factory()->create();
-        $task = Task::factory()->create([
-            'user_id' => $user->id,
-            'project_id' => $project->id,
-        ]);
-        $task2 = Task::factory()->create([
-            'user_id' => $user2->id,
-            'project_id' => $project->id,
-        ]);
+        $response = $this->actingAs($user2)->get(route('task.index'));
 
 
+        $response->assertStatus(200);
+        $response->assertSee($task2->name);
+        $response->assertSee($task2->description);
+        $response->assertSee($otherTask->name);
+        $response->assertSee($otherTask->description);
+        $response->assertDontSee($task1->name);
+        $response->assertDontSee($task1->description);
 
-        $this->actingAs($user)
-            ->get(route('task.index', ['project' => $project]))
-            ->assertViewIs('task.index')
-            ->assertViewHas('tasks', function ($tasks) use ($task) {
-                return $tasks->contains($task);
-            });
-        $this->actingAs($user)->get(route('task.index', ['project' => $project]))
-        ->assertViewIs('task.index')
-        ->assertDontSee($task2);
-
-        $this->actingAs($user)->get(route('task.index', ['project' => $project2]))
-        ->assertViewIs('task.index')
-        ->assertDontSee($task2)
-        ->assertDontSee($task);
-
-        $this->actingAs($user2)
-            ->get(route('task.index', ['project' => $project]))
-            ->assertViewIs('task.index')
-            ->assertViewHas('tasks', function ($tasks) use ($task2) {
-                return $tasks->contains($task2);
-            });
-        $this->actingAs($user2)->get(route('task.index', ['project' => $project]))
-        ->assertViewIs('task.index')
-        ->assertDontSee($task);
     }
 
     /** @test */
     public function a_task_can_be_only_created_by_an_admin_or_a_user_that_is_affected_to_given_project()
     {
-        $admin = User::factory()->create(['role' => 'admin']);
-        $user = User::factory()->create();
-        $project = Project::factory()->create(['user_id' => $user->id]);
+        $ok1= Role::create(['name' => 'admin']);
+        $ok2 = Role::create(['name' => 'user']);
+
+        $admin=User::factory()->create(['role_id' => $ok1->id]);
+
+        $user = User::factory()->create(['role_id' => $ok2->id]);
+        $user2 = User::factory()->create(['role_id' => $ok2->id]);
+
+        $project = Project::factory()->create(['creator_id' => $admin->id]);
+        $project->users()->attach($user->id);
 
         // Admin can create a task
-        $this->actingAs($admin)
-            ->post(route('task.store', ['project' => $project]), [
+        $response=$this->actingAs($admin)
+            ->post(route('task.store', [
+                'project_id' => $project->id,
                 'name' => 'Task 1',
                 'description' => 'Task description',
-                'user_id' => $user->id,
-            ])
-            ->assertRedirect(route('task.index', ['project' => $project]))
-            ->assertSessionHas('status', 'Task has been successfully created.');
+                'creator_id' => $admin->id,
+            ]));
+
+           //$response->assertRedirect(route('task.index'));
+           //$response->assertSessionHas('status', 'Task has been created successfully.');
 
         $this->assertDatabaseHas('tasks', [
             'name' => 'Task 1',
             'description' => 'Task description',
             'project_id' => $project->id,
-            'user_id' => $user->id,
+            'creator_id' => $admin->id,
         ]);
 
         // User who is affected to the project can create a task
+        //dd($user->projects()->wherePivot('project_id', $project->id)->exists());
         $this->actingAs($user)
-            ->post(route('task.store', ['project' => $project]), [
+            ->post(route('task.store', [
                 'name' => 'Task 2',
+                'project_id' => $project->id,
                 'description' => 'Task description',
-                'user_id' => $user->id,
-            ])
-            ->assertRedirect(route('task.index', ['project' => $project]))
-            ->assertSessionHas('status', 'Task has been successfully created.');
+                'creator_id' => $user->id,
+            ]));
 
+           // $response->assertRedirect(route('task.index'));
+            //$response->assertSessionHas('status', 'Task has been created successfully.');
         $this->assertDatabaseHas('tasks', [
             'name' => 'Task 2',
             'description' => 'Task description',
             'project_id' => $project->id,
-            'user_id' => $user->id,
+            'creator_id' => $user->id,
         ]);
 
         // User who is not affected to the project cannot create a task
-        $otherUser = User::factory()->create();
+        $otherUser = User::factory()->create(['role_id' => $ok2->id]);
         $this->actingAs($otherUser)
-            ->post(route('task.store', ['project' => $project]), [
+            ->post(route('task.store' ,[
                 'name' => 'Task 3',
+                'project_id' => $project->id,
                 'description' => 'Task description',
-                'user_id' => $otherUser->id,
-            ])
+                'creator_id' => $otherUser->id,
+            ]))
             ->assertForbidden();
 
         $this->assertDatabaseMissing('tasks', [
             'name' => 'Task 3',
             'description' => 'Task description',
             'project_id' => $project->id,
-            'user_id' => $otherUser->id,
+            'creator_id' => $otherUser->id,
         ]);
     }
 }

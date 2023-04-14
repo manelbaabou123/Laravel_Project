@@ -28,7 +28,7 @@ class ProjectController extends Controller
     public function create()
     {
         try {
-            if(auth()->user()->roles()->where('name', 'admin')->exists()) {
+            if(auth()->user()->role()->where('name', 'admin')->exists()) {
                 return view('project.create');
             } else {
                 return redirect()->route('project.index')->withErrors(['message' => 'You are not authorized to access this page.']);
@@ -37,7 +37,7 @@ class ProjectController extends Controller
             Log::critical("create error project".$ex->getMessage());
             abort(500);
         }
-        
+
     }
 
     /**
@@ -52,7 +52,7 @@ class ProjectController extends Controller
             Log::critical("store error project".$ex->getMessage());
             abort(500);
         }
-        
+
     }
 
     /**
@@ -73,7 +73,7 @@ class ProjectController extends Controller
             Log::critical("edit error project".$ex->getMessage());
             abort(500);
         }
-        
+
     }
 
     /**
@@ -84,18 +84,18 @@ class ProjectController extends Controller
         try {
             //  dd($request->all());
             $request->validate(['name' => 'required', 'description' => 'required']);
-        
+
             $project->update([
             'name' => $request->name,
             'description' => $request->description
             ]);
-            
+
             return redirect()->route('project.index')->with('status', 'Project has been successfully modified.');
         } catch (Exception $ex) {
             Log::critical("update error project".$ex->getMessage());
             abort(500);
         }
-      
+
 
     }
 
@@ -111,6 +111,6 @@ class ProjectController extends Controller
             Log::critical("destroy error project".$ex->getMessage());
             abort(500);
         }
-        
+
     }
 }

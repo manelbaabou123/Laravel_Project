@@ -17,10 +17,11 @@ class TaskController extends Controller
     {
         try {
             //$this->authorize('view', Task::class);
+            //Auth()->user()->hasRoleAdmin() ? Task::paginate(10) :
+            $tasks =  Auth()->user()->tasks()->paginate(10);
+            //dd($tasks);
+            //$tasks =Task::paginate(10);
 
-            //$tasks =  Auth()->user()->hasRoleAdmin() ? Task::paginate(10) : Auth()->user()->tasks()->paginate(10);
-            $tasks =Task::paginate(10);
-            
             return view('task.index', ['tasks' => $tasks]);
             //return view('task.index',  ['tasks' => Task::paginate(10)]);
          } catch (\Exception $ex) {
@@ -35,7 +36,13 @@ class TaskController extends Controller
     public function create()
     {
         try {
+            if (Auth()->user()->hasRoleAdmin()){
             return view('task.create', ['projects' => Project::all(), 'users' => User::all()]);
+            }else{
+                $projects   = Auth()->user()->projects();
+                $users = Auth::user();
+                return view('task.create', ['projects' => $projects , 'users' => $users ]);
+            }
         } catch (\Exception $ex) {
             Log::critical("create error task".$ex->getMessage());
             abort(500);
@@ -52,15 +59,30 @@ class TaskController extends Controller
                 'name' => 'required',
                 'description' => 'required',
                 'project_id' => 'required',
-                'user_id' => 'required'
+                'creator_id' => 'required'
             ]);
+
+            if (Auth()->user()->hasRoleAdmin()){
+
         Task::create($request->all());
-        //$this->authorize('store', Task::class);
         return redirect()->route('task.index')->with('status', 'Task has been created successfully.');
-        } catch (\Exception $ex) {
-            Log::critical("store error task".$ex->getMessage());
-            abort(500);
+
+    }
+        else if (in_array($request->project_id, Auth()->user()->projects()->pluck('id'))){
+            dd("am a user that belongs to this project");
+            Task::create($request->all());
+            return redirect()->route('task.index')->with('status', 'Task has been created successfully.');
         }
+        else{
+            dd("am a user that do not belongs to this project");
+            return redirect()->route('task.index')->with('status', 'You are not allowed to create this task');
+        }
+        //$this->authorize('store', Task::class);
+
+         } catch (\Exception $ex) {
+             Log::critical("store error task".$ex->getMessage());
+             abort(500);
+         }
     }
 
     /**
@@ -97,14 +119,14 @@ class TaskController extends Controller
                 'project_id' => 'required',
                 'user_id' => 'required'
             ]);
-      
+
             $task->update([
                 'name' => $request->name,
                 'description' => $request->description,
                 'project_id' => $request->project_id,
                 'user_id' => $request->user_id
             ]);
-            
+
             return redirect()->route('task.index')->with('status', 'Task has been successfully modified.');
         } catch (\Exception $ex) {
             Log::critical("update error task".$ex->getMessage());
