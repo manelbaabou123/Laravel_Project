@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Models;
-
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -9,11 +9,20 @@ class Project extends Model
 {
     use HasFactory;
 
-    protected $table = 'projects';
-    protected $fillable = ['name', 'description'];
+    protected $fillable = ['name', 'description', 'creator_id',];
 
-    public function tasks()
+    public function creator(): BelongsTo
     {
-        return $this->hasMany(task::class);
+        return $this->belongsTo(User::class, 'creator_id');
+    }
+
+    public function tasks(): HasMany
+    {
+        return $this->hasMany(Task::class);
+    }
+
+    public function users(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class);
     }
 }

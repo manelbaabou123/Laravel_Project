@@ -18,7 +18,9 @@ class TaskController extends Controller
         try {
             //$this->authorize('view', Task::class);
 
-            $tasks =  Auth()->user()->hasRoleAdmin() ? Task::paginate(10) : Auth()->user()->tasks()->paginate(10);
+            //$tasks =  Auth()->user()->hasRoleAdmin() ? Task::paginate(10) : Auth()->user()->tasks()->paginate(10);
+            $tasks =Task::paginate(10);
+            
             return view('task.index', ['tasks' => $tasks]);
             //return view('task.index',  ['tasks' => Task::paginate(10)]);
          } catch (\Exception $ex) {

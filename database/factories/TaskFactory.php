@@ -22,7 +22,7 @@ class TaskFactory extends Factory
             'name' =>  fake()->name(),
             'description' =>  fake()->text(),
             'project_id' => Project::all()->random()->id,
-            'user_id' =>   User::all()->random()->id
+            
           ];
     }
 }
