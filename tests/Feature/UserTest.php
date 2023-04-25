@@ -8,6 +8,7 @@ use App\Models\Task;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
 
 class UserTest extends TestCase
@@ -64,6 +65,34 @@ class UserTest extends TestCase
         $this->assertEquals([1, 2], $admin->roles()->pluck('id')->toArray());
     }
 
+    public function test_admin_can_create_a_new_user()
+    {
+        Role::create(['name' => 'admin']);
+        Role::create(['name' => 'user']);
+        // Create an admin user
+        $admin = User::factory()->create();
+        $admin->roles()->attach(1);
+
+        // Make a POST request to create a new user
+        $response = $this->actingAs($admin)->post(route('user.store'), [
+            'name' => 'New User name',
+            'email' => 'Newuser@gmail.com',
+            'password' => Hash::make('password'),
+            'role_id' => 2,
+        ]);
+
+        $this->assertDatabaseHas('users', [
+            'name' => 'New User name',
+            'email' => 'Newuser@gmail.com',
+        ]);
+
+        // Assert that the user is redirected to the user index page after user creation
+        $response->assertStatus(302);
+        $response->assertRedirect(route('user.index'))
+            ->assertSessionHas('status', 'User has been created successfully.');
+
+    }
+
     public function test_admin_can_update_user_information()
     {
         // Create roles
@@ -112,23 +141,40 @@ class UserTest extends TestCase
         $response->assertSee('admin');
     }
 
-    // public function test_admin_can_delete_other_users()
-    // {
-    //     $admin = User::factory()->create();
-    //     $admin->roles()->attach(Role::where('name', 'admin')->first());
+    public function test_admin_auth_cannot_destroy_hisself()
+    {
+        $admin = User::factory()->create();
+        $admin->roles()->attach(Role::where('name', 'admin')->first());
+
+        // Assert that the auth admin exists in the database
+        $this->assertDatabaseHas('users', ['id' => $admin->id]);
+             
+        $response = $this->actingAs($admin)->get(route('user.destroy', ['user' => $admin]));
+
+        $response->assertStatus(403);
     
-    //     $user = User::factory()->create();
-    //     $user->roles()->attach(Role::where('name', 'user')->first());
+        // Assert that the auth admin in the database
+        $this->assertDatabaseHas('users', ['id' => $admin->id]);
+    }
+    
+    public function test_admin_can_delete_user()
+    {
+        Role::create(['name' => 'admin']);
+        $admin = User::factory()->create();
+        $admin->roles()->attach(1);
 
-    //     // Assert that the user exists in the database
-    //     $this->assertDatabaseHas('users', ['id' => $user->id]);
-             
-    //     $response = $this->actingAs($admin)->get(route('user.destroy', $user));
+        // Create a user
+        Role::create(['name' => 'user']);
+        $user = User::factory()->create();
+        $user->roles()->attach(2);
 
-             
-    //     // Assert that the user is no longer in the database
-    //     $this->assertDatabaseMissing('users', ['id' => $user->id]);
+        // Call the delete method
+        $response = $this->actingAs($admin)->get(route('user.destroy', ['user' => $user]));
 
-    // }
-
+        $response->assertStatus(302);
+        $response->assertDontSee($user->name);
+ 
+        $this->assertDatabaseMissing('users', ['id' => $user->id]);
+    }
+ 
 }
