@@ -37,7 +37,8 @@ class ProjectPolicy
      */
     public function update(User $user, Project $project): bool
     {
-        return $user->hasRoleAdmin()|| (auth()->check() && $user->id == $project->user_id);
+        // return $user->hasRoleAdmin()|| (auth()->check() && $user->id == $project->user_id);
+        return $user->hasRoleAdmin();
     }
 
     /**

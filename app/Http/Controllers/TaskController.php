@@ -18,10 +18,14 @@ class TaskController extends Controller
     {
         try {
             //$this->authorize('view', Task::class);
+            if (Auth()->user()->hasRoleAdmin() || Auth()->user()) {
 
-            $tasks =  Auth()->user()->hasRoleAdmin() ? Task::paginate(10) : Auth()->user()->tasks()->paginate(10);
-            return view('task.index', ['tasks' => $tasks]);
-            //return view('task.index',  ['tasks' => Task::paginate(10)]);
+                $tasks =  Auth()->user()->hasRoleAdmin() ? Task::paginate(10) : Auth()->user()->tasks()->paginate(10);
+                return view('task.index', ['tasks' => $tasks]);
+                //return view('task.index',  ['tasks' => Task::paginate(10)]);
+            } else {
+                abort(403, 'You do not have access to index Tasks.');
+            }
          } catch (\Exception $ex) {
              Log::critical("index error task".$ex->getMessage());
              abort(500);
@@ -34,7 +38,11 @@ class TaskController extends Controller
     public function create()
     {
         try {
-            return view('task.create', ['projects' => Project::all(), 'users' => User::all()]);
+            if (Auth()->user()->hasRoleAdmin() || Auth()->user()) {
+                return view('task.create', ['projects' => Project::all(), 'users' => User::all()]);
+            } else {
+                abort(403, 'You do not have access to create Tasks.');
+            }
         } catch (\Exception $ex) {
             Log::critical("create error task".$ex->getMessage());
             abort(500);
@@ -47,22 +55,27 @@ class TaskController extends Controller
     public function store(Request $request)
     {
         try {
-            $request->validate([
-                'name' => 'required',
-                'description' => 'required',
-                'project_id' => 'required',
-                'user_id' =>  Auth()->user()->hasRoleAdmin() ?  'required' : ''
-            ]);
+            if (Auth()->user()->hasRoleAdmin() || Auth()->user()) {
 
-               Task::create( [
-                "project_id" =>  $request->project_id,
-                "name" =>  $request->name,
-                "description" => $request->description,
-                'user_id' => Auth()->user()->hasRoleAdmin() ?  $request->user_id  : Auth::id()
-        ]);
-       
-        //$this->authorize('store', Task::class);
-        return redirect()->route('task.index')->with('status', 'Task has been created successfully.');
+                $request->validate([
+                    'name' => 'required',
+                    'description' => 'required',
+                    'project_id' => 'required',
+                    'user_id' =>  Auth()->user()->hasRoleAdmin() ?  'required' : ''
+                ]);
+
+                Task::create( [
+                    "project_id" =>  $request->project_id,
+                    "name" =>  $request->name,
+                    "description" => $request->description,
+                    'user_id' => Auth()->user()->hasRoleAdmin() ?  $request->user_id  : Auth::id()
+            ]);
+        
+            //$this->authorize('store', Task::class);
+            return redirect()->route('task.index')->with('status', 'Task has been created successfully.');
+            } else {
+                abort(403, 'You do not have access to store Tasks.');
+            }
         } catch (\Exception $ex) {
             Log::critical("store error task".$ex->getMessage());
             abort(500);
@@ -83,11 +96,16 @@ class TaskController extends Controller
     public function edit(Task $task)
     {
         try {
-            //$this->authorize('update', $task);
-            return view('task.update', ['task' =>  $task ,'projects' => Project::all(), 'users' => User::all()]);
+            if (Auth()->user()->hasRoleAdmin() || Auth()->user()) {
+
+                //$this->authorize('update', $task);
+                return view('task.update', ['task' =>  $task ,'projects' => Project::all(), 'users' => User::all()]);
+            } else {
+                abort(403, 'You do not have access to edit Tasks.');
+            }
         } catch (\Exception $ex) {
-            Log::critical("edit error task".$ex->getMessage());
-            abort(500);
+           Log::critical("edit error task".$ex->getMessage());
+           abort(500);
         }
     }
 
@@ -96,7 +114,9 @@ class TaskController extends Controller
      */
     public function update(Request $request, Task $task)
     {
-        try {
+        // try {
+            if (Auth()->user()->hasRoleAdmin() || Auth()->user()) {
+
             $request->validate([
                 'name' => 'required',
                 'description' => 'required',
@@ -115,10 +135,13 @@ class TaskController extends Controller
             ]);
             
             return redirect()->route('task.index')->with('status', 'Task has been successfully modified.');
-        } catch (\Exception $ex) {
-            Log::critical("update error task".$ex->getMessage());
-            abort(500);
+        } else {
+            abort(403, 'You do not have access to update Tasks.');
         }
+        // } catch (\Exception $ex) {
+        //     Log::critical("update error task".$ex->getMessage());
+        //     abort(500);
+        // }
     }
 
     /**
@@ -127,8 +150,13 @@ class TaskController extends Controller
     public function destroy(Task $task)
     {
         try {
+
+            $this->authorize('delete', $task);
+    
+
             $task->delete();
-        return redirect()->route('task.index')->with('status', 'Task has been successfully suppressed.');
+            return redirect()->route('task.index')->with('status', 'Task has been successfully suppressed.');
+       
         } catch (\Exception $ex) {
             Log::critical("destroy error task".$ex->getMessage());
             abort(500);
